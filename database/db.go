@@ -23,8 +23,13 @@ func Opendb() {
 
 	createTableSQL := `CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
+<<<<<<< HEAD
 		email VARCHAR(30) NOT NULL UNIQUE,
+=======
+		username VARCHAR(15) NOT NULL UNIQUE,
+>>>>>>> 65b023b41245b60c47816563dff57fd4c96890ec
 		name VARCHAR(30) NOT NULL,
+		email VARCHAR(15) NOT NULL UNIQUE,
 		password VARCHAR(15) NOT NULL
 	);`
 
@@ -41,5 +46,4 @@ func CloseDB() {
 	if err != nil {
 		log.Fatal("Erreur lors de la fermeture de la base de données:", err)
 	}
-	fmt.Println("Base de données fermée avec succès.")
 }
