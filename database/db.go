@@ -23,10 +23,11 @@ func Opendb() {
 
 	createTableSQL := `CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		username VARCHAR(30) NOT NULL UNIQUE,
+		email VARCHAR(30) NOT NULL UNIQUE,
 		name VARCHAR(30) NOT NULL,
 		password VARCHAR(15) NOT NULL
 	);`
+
 	_, err = DB.Exec(createTableSQL) // Exécuter la requête de création de table
 	if err != nil {
 		log.Fatal(err) // Gérer l'erreur si la création échoue
