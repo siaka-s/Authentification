@@ -23,7 +23,7 @@ func Opendb() {
 
 	createTableSQL := `CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name VARCHAR(30) NOT NULL,
+		nom VARCHAR(30) NOT NULL,
 		email VARCHAR(30) NOT NULL UNIQUE,
 		password VARCHAR(15) NOT NULL
 	);`
