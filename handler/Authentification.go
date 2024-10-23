@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"Authentification/database"
 	"Authentification/model"
 	"database/sql"
 	"html/template"
@@ -12,9 +13,10 @@ import (
 
 // Fonction pour définir les routes
 func SetupRoutes() {
+	http.HandleFunc("/", acceuilRoute)
 	http.HandleFunc("/signup", signupRoute)
 	http.HandleFunc("/login", loginRoute)
-	http.HandleFunc("/acceuil", acceuilRoute)
+	http.HandleFunc("/dashboard", dashboardRoute)
 }
 
 // Handler pour le formulaire d'inscription
@@ -53,6 +55,52 @@ func signupRoute(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func loginRoute(w http.ResponseWriter, r *http.Request) {
+	// Vérifier que la méthode est POST ou GET
+	if r.Method == http.MethodGet {
+		renderTemplate(w, "login.html")
+		return
+	}
+
+	if r.Method != http.MethodPost {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	// Extraire les données du formulaire
+	email := r.FormValue("email")
+	password := r.FormValue("password")
+
+	// Vérifier que les champs ne sont pas vides
+	if email == "" || password == "" {
+		http.Error(w, "Email et mot de passe requis", http.StatusBadRequest)
+		return
+	}
+
+	// Récupérer l'utilisateur dans la base de données en utilisant l'email
+	var user model.User
+	query := "SELECT id, email, password FROM users WHERE email = ?"
+	err := database.DB.QueryRow(query, email).Scan(&user.ID, &user.Email, &user.Password)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "Email ou mot de passe incorrect", http.StatusUnauthorized)
+			return
+		}
+		http.Error(w, "Erreur serveur, veuillez réessayer", http.StatusInternalServerError)
+		return
+	}
+
+	// Comparer le mot de passe haché avec le mot de passe fourni
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		http.Error(w, "Email ou mot de passe incorrect", http.StatusUnauthorized)
+		return
+	}
+
+	// Si tout est correct, rediriger l'utilisateur vers la page de succès ou dashboard
+	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+}
+
 // Fonction pour insérer un utilisateur dans la base de données
 func insertUser(user model.User) error {
 	db, err := sql.Open("sqlite3", "auth.db") // Assure-toi que le nom est correct
@@ -87,16 +135,16 @@ func renderTemplate(w http.ResponseWriter, tmpl string) {
 	}
 }
 
-func loginRoute(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-
-		renderTemplate(w, "login.html")
-	}
-}
-
 func acceuilRoute(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 
 		renderTemplate(w, "acceuil.html")
+	}
+}
+
+func dashboardRoute(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+
+		renderTemplate(w, "dashboard.html")
 	}
 }
