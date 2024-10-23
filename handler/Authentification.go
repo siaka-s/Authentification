@@ -12,12 +12,13 @@ import (
 
 // Fonction pour définir les routes
 func SetupRoutes() {
-	http.HandleFunc("/signup", signupHandler)
-	http.HandleFunc("/login", loginHandler)
+	http.HandleFunc("/signup", signupRoute)
+	http.HandleFunc("/login", loginRoute)
+	http.HandleFunc("/acceuil", acceuilRoute)
 }
 
 // Handler pour le formulaire d'inscription
-func signupHandler(w http.ResponseWriter, r *http.Request) {
+func signupRoute(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		// Récupérer les valeurs du formulaire
 		nom := r.FormValue("name")
@@ -86,9 +87,16 @@ func renderTemplate(w http.ResponseWriter, tmpl string) {
 	}
 }
 
-func loginHandler(w http.ResponseWriter, r *http.Request) {
+func loginRoute(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		// Afficher la page de connexion
+
 		renderTemplate(w, "login.html")
+	}
+}
+
+func acceuilRoute(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+
+		renderTemplate(w, "acceuil.html")
 	}
 }

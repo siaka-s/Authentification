@@ -20,7 +20,7 @@ func main() {
 	handler.SetupRoutes()
 
 	// Démarrer le serveur sur le port 8080
-	log.Println("Serveur démarré sur http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Println("Serveur démarré sur http://localhost:8000")
+	log.Fatal(http.ListenAndServe(":8000", nil))
 
 }
