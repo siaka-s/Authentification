@@ -142,9 +142,66 @@ func acceuilRoute(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Fonction pour récupérer tous les utilisateurs depuis la base de données
+func getAllUsers() ([]model.User, error) {
+	var users []model.User
+
+	query := "SELECT id, nom, email FROM users"
+	rows, err := database.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Boucle pour récupérer chaque utilisateur
+	for rows.Next() {
+		var user model.User
+		if err := rows.Scan(&user.ID, &user.Nom, &user.Email); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
+// Handler pour le dashboard
 func dashboardRoute(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
+		// Récupérer tous les utilisateurs
+		users, err := getAllUsers()
+		if err != nil {
+			http.Error(w, "Erreur lors de la récupération des utilisateurs", http.StatusInternalServerError)
+			return
+		}
 
-		renderTemplate(w, "dashboard.html")
+		// Passer la liste des utilisateurs au template
+		data := struct {
+			Users []model.User
+		}{
+			Users: users,
+		}
+
+		renderTemplateWithData(w, "dashboard.html", data)
+	}
+}
+
+// Fonction pour rendre un template avec des données
+func renderTemplateWithData(w http.ResponseWriter, tmpl string, data interface{}) {
+	tmplPath := "templates/" + tmpl
+	t, err := template.ParseFiles(tmplPath)
+	if err != nil {
+		log.Printf("Erreur de rendu du template %s: %v", tmpl, err)
+		http.Error(w, "Erreur du serveur interne", http.StatusInternalServerError)
+		return
+	}
+	err = t.Execute(w, data)
+	if err != nil {
+		log.Printf("Erreur d'exécution du template %s: %v", tmpl, err)
+		http.Error(w, "Erreur du serveur interne", http.StatusInternalServerError)
 	}
 }
